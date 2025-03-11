@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  backend:
+    image: localhost:5000/backend:latest
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          cpus: "0.5"
+        reservations:
+          cpus: "0.1"
+    ports:
+      - "5001:5001"
+    networks:
+      - app-network
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - app-network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: overlay
